@@ -7,6 +7,7 @@ class Viewonce:
 
     def open_file(self, file_path):
         try:
+            print("Opening file {}".format(file_path))
             print(f"Attempting to open file: {file_path}")
 
             # Check if the file exists
