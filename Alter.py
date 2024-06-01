@@ -1,95 +1,60 @@
-from cryptography.fernet import Fernet
-from PIL import Image
+import pygetwindow as gw
+import time
 import os
-import cv2
+from PIL import Image, ImageDraw
+import mimetypes
 
 
-class Alter:
-    def __init__(self, key_file="key.key"):
-        self.key_file = key_file
-        self.fernet = None
+# Function to overlay an image with black
+def overlay_with_black(image_path):
+    img = Image.open(image_path)
+    width, height = img.size
+    black = Image.new('RGBA', (width, height), (0, 0, 0, 255))
+    img.paste(black, (0, 0), black)
+    img.save(image_path)
 
-    def generate_key(self):
-        if not os.path.exists(self.key_file):
-            key = Fernet.generate_key()
-            with open(self.key_file, "wb") as key_file:
-                key_file.write(key)
 
-    def load_key(self):
-        if os.path.exists(self.key_file):
-            with open(self.key_file, "rb") as key_file:
-                key = key_file.read()
-                self.fernet = Fernet(key)
+# Function to detect file type and overlay with black accordingly
+def protect_file(file_path):
+    file_type, _ = mimetypes.guess_type(file_path)
+    if file_type:
+        file_type = file_type.split('/')[0]  # Get the general type (e.g., image, video, application)
+
+        if file_type == 'image':
+            overlay_with_black(file_path)
+        elif file_type == 'video':
+            overlay_with_black(file_path)
+        elif file_type == 'application':
+            # For documents, convert them to images first, then overlay with black
+            # You'll need to use appropriate libraries for document conversion (e.g., PyMuPDF for PDF)
+            # Here, I'll simply treat unknown application files as images
+            overlay_with_black(file_path)
         else:
-            raise FileNotFoundError("Key file not found.")
-
-    def encrypt_image(self, image_path, encrypted_path):
-        if not self.fernet:
-            raise ValueError("Encryption key not loaded.")
-
-        with open(image_path, "rb") as file:
-            data = file.read()
-
-        encrypted_data = self.fernet.encrypt(data)
-
-        with open(encrypted_path, "wb") as encrypted_file:
-            encrypted_file.write(encrypted_data)
-
-    def decrypt_image(self, encrypted_path, decrypted_path):
-        if not self.fernet:
-            raise ValueError("Encryption key not loaded.")
-
-        with open(encrypted_path, "rb") as encrypted_file:
-            encrypted_data = encrypted_file.read()
-
-        decrypted_data = self.fernet.decrypt(encrypted_data)
-
-        with open(decrypted_path, "wb") as decrypted_file:
-            decrypted_file.write(decrypted_data)
-
-    def add_watermark(self, image_path, watermark_text, output_path):
-        image = Image.open(image_path)
-        watermark = Image.new("RGBA", image.size, (255, 255, 255, 0))
-        watermark_draw = ImageDraw.Draw(watermark)
-        watermark_draw.text((10, 10), watermark_text, fill=(255, 255, 255, 128))
-
-        watermarked_image = Image.alpha_composite(image.convert("RGBA"), watermark)
-        watermarked_image = watermarked_image.convert("RGB")
-
-        watermarked_image.save(output_path)
-
-    def obfuscate_video(self, video_path, obfuscated_path):
-        cap = cv2.VideoCapture(video_path)
-        fourcc = cv2.VideoWriter_fourcc(*"XVID")
-        out = cv2.VideoWriter(obfuscated_path, fourcc, 30.0, (640, 480))
-
-        while cap.isOpened():
-            ret, frame = cap.read()
-            if ret:
-                # Apply some obfuscation techniques here
-                # For example, blurring the frame
-                blurred_frame = cv2.GaussianBlur(frame, (15, 15), 0)
-                out.write(blurred_frame)
-            else:
-                break
-
-        cap.release()
-        out.release()
+            print(f"Unsupported file type: {file_type}")
+    else:
+        print("Unknown file type")
 
 
-# Example usage:
-secure_file_manager = Alter()
-secure_file_manager.generate_key()
-secure_file_manager.load_key()
+# Function to periodically check for screenshot
+def detect_screenshot(file_path):
+    prev_screenshot = None
+    while True:
+        # Capture screen
+        screenshot = gw.getWindowsWithTitle('Screen')[0].screenshot()
 
-# Encrypt an image
-secure_file_manager.encrypt_image("image.jpg", "encrypted_image.jpg")
+        # Compare with previous screenshot
+        if prev_screenshot is not None and prev_screenshot.tobytes() != screenshot.tobytes():
+            print("Screenshot detected!")
+            protect_file(file_path)
 
-# Decrypt the encrypted image
-secure_file_manager.decrypt_image("encrypted_image.jpg", "decrypted_image.jpg")
+        prev_screenshot = screenshot
+        time.sleep(1)  # Adjust the interval as needed
 
-# Add watermark to an image
-secure_file_manager.add_watermark("image.jpg", "Confidential", "watermarked_image.jpg")
 
-# Obfuscate a video
-secure_file_manager.obfuscate_video("video.mp4", "obfuscated_video.mp4")
+# Example usage
+if __name__ == "__main__":
+    file_path = "your_file_path"  # Replace "your_file_path" with the path to your file
+    if os.path.exists(file_path):
+        detect_screenshot(file_path)
+    else:
+        print("File not found!")
