@@ -1,5 +1,5 @@
 # LifeRoulette
-Our project is called Project Peace Protector and our problem statement is Digital Threats’ Subtheme 2 - Digital Rights Management (DRM). Our hacking provides an innovative, feasible and straightforward solution to preventing unauthorised access, and therefore unnecessary distribution and reproduction of digital content. 
+Our project is called Project Life Roulette and our problem statement is Digital Threats’ Subtheme 2 - Digital Rights Management (DRM). Our hacking provides an innovative, feasible and straightforward solution to preventing unauthorised access, and therefore unnecessary distribution and reproduction of digital content. 
 
 To prevent unauthorised access of content and files, current solutions out there include using a key to control access to a file, or allowing a user to download but not run a program. However, they still have certain limitations in protecting digital content. 
 
