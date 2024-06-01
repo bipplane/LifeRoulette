@@ -1,4 +1,4 @@
-import encryptor
+from encryptor import encryptor
 import Alter
 import Viewonce
 

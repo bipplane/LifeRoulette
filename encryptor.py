@@ -181,15 +181,6 @@ secure_file_manager = encryptor()
 secure_file_manager.generate_key()
 secure_file_manager.load_key()
 
-# Encrypt an image
-secure_file_manager.encrypt_image("Database simulation/7.png", "Database simulation/encrypted_7.png")
-
-# Decrypt the encrypted image
-secure_file_manager.decrypt_image("Database simulation/encrypted_7.png", "Database simulation/decrypted_7.png")
-
-# Add watermark to an image
-secure_file_manager.add_watermark("Database simulation/7.png", "Confidential", "Database simulation/watermarked_7.png")
-
 # Create and obfuscate a sample video
 def create_sample_video(video_path):
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
